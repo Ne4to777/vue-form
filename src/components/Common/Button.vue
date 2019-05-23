@@ -36,7 +36,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import './../assets/stylus/global.styl'
+@import './../../assets/stylus/global.styl'
 
 .button
   padding 0 $padding__base

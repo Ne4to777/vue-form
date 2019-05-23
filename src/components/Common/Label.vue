@@ -11,7 +11,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import './../assets/stylus/global.styl'
+@import './../../assets/stylus/global.styl'
 
 .label
   display inline-block
