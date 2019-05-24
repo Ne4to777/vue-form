@@ -5,12 +5,13 @@
 			title="Привет"
 			:required="true"
 			name="someInput"
-			initValue="hi"
+			initValue="hiaa"
 			:disabled="false"
 			v-model="singleInputValue"
 			:validator="singleInputValidator"
-			mask="date"
 			icon="user"
+			mask="date"
+			:isValidateOnChange="false"
 			@iconClick="onIconClick"
 		/>
 		<Button @click.native="onButtonClick"/>
@@ -51,11 +52,14 @@ export default {
 	methods: {
 		async onButtonClick() {
 			console.log(await this.$refs.SingleLineInput.confirm())
+			setTimeout(() => {
+				this.$refs.SingleLineInput.reset()
+			}, 1000)
 		},
 		singleInputValidator(value) {
 			return new Promise(resolve => {
 				setTimeout(() => {
-					resolve(value === 'hi' ? void 0 : 'not hi')
+					resolve(value.length > 5 ? 'too long' : void 0)
 				}, 100)
 			})
 		},
@@ -84,15 +88,4 @@ body
 .s-icon_hover:active, .s-icon_hover:hover
 	color $blue
 	cursor pointer
-
-.single-line__s-icon
-	position absolute
-	width 14px
-	height 14px
-	line-height 14px
-	padding $padding__extra-small
-	top 50%
-	right 10px
-	margin -12px 0px 0px 0px
-	z-index 4
 </style>
