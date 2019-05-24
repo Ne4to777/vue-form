@@ -1,15 +1,20 @@
 <template>
 	<div>
-		<SingleLineInput 
+		<Title>Заголовок</Title>
+		<HtmlInput ref="HtmlInput"><h1>html</h1></HtmlInput>
+		<DescriptionInput ref="DescriptionInput">description</DescriptionInput>
+		<QuestionInput ref="QuestionInput">question</QuestionInput>
+		<CheckboxInput title="hi" :disabled="false" :initValue="true"/>
+		<TaggedInput 
 			ref="SingleLineInput"
 			title="Привет"
 			:required="true"
 			name="someInput"
-			initValue="hiaa"
+			:initValue="['avya yv','b yvaa ','c','yvay a v']"
 			:disabled="false"
 			v-model="singleInputValue"
 			:validator="singleInputValidator"
-			icon="user"
+			icon="plus"
 			mask="date"
 			:isValidateOnChange="false"
 			@iconClick="onIconClick"
@@ -34,12 +39,26 @@
 
 <script>
 import SingleLineInput from '@/components/SingleLineInput/SingleLineInput'
+import HtmlInput from '@/components/HtmlInput/HtmlInput'
+import DescriptionInput from '@/components/DescriptionInput/DescriptionInput'
+import QuestionInput from '@/components/QuestionInput/QuestionInput'
+import CheckboxInput from '@/components/CheckboxInput/CheckboxInput'
+import DroplistInput from '@/components/DroplistInput/DroplistInput'
+import TaggedInput from '@/components/TaggedInput/TaggedInput'
+import Title from '@/components/Common/Title'
 import Button from '@/components/Common/Button'
 export default {
 	name: 'aura-form',
 	components: {
+		Title,
+		Button,
 		SingleLineInput,
-		Button
+		DescriptionInput,
+		QuestionInput,
+		CheckboxInput,
+		DroplistInput,
+		TaggedInput,
+		HtmlInput
 	},
 	data() {
 		return {
@@ -54,6 +73,7 @@ export default {
 			console.log(await this.$refs.SingleLineInput.confirm())
 			setTimeout(() => {
 				this.$refs.SingleLineInput.reset()
+				this.$refs.HtmlInput.reset()
 			}, 1000)
 		},
 		singleInputValidator(value) {

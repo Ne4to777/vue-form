@@ -45,7 +45,8 @@ export default {
 		initValue: { type: String, default: '' },
 		isValidateOnChange: { type: Boolean, default: true },
 		isValidateOnBlur: { type: Boolean, default: true },
-		validator: { type: Function, default: _ => _ },
+		isValidateOnIconClick: { type: Boolean, default: true },
+		validator: { type: Function },
 		mask: String,
 		icon: String
 	},
@@ -73,7 +74,8 @@ export default {
 				if (this.required || this.content) this.content = chargeMask(this.mask)(this.content)
 				if (this.validator) this.message = await this.validator(this.content)
 			}
-			if (!this.isValidateOnChange && this.validator) this.message = await this.validator(this.content)
+			if ((!this.isValidateOnChange || this.isValidateOnIconClick) && this.validator)
+				this.message = await this.validator(this.content)
 			if (this.required && !this.content) this.message = 'Заполните поле'
 		},
 		async confirm() {
@@ -120,8 +122,14 @@ export default {
 		onRedo(e) {
 			this.$emit('redo', this.content)
 		},
-		onIconClick(e) {
-			this.$emit('iconClick', this.content)
+		async onIconClick(e) {
+			if (this.isValidateOnIconClick) {
+				await this.validate()
+				this.validatedOnce = true
+				!this.message && this.$emit('iconClick', this.content)
+			} else {
+				this.$emit('iconClick', this.content)
+			}
 		}
 	}
 }
