@@ -39,27 +39,27 @@ export default {
 @import './../../assets/stylus/global.styl'
 
 .button
-  padding 0 $padding__base
-  border-radius $border-radius__base
+  padding 0 $padding_base
+  border-radius $border-radius_base
   height 34px
   line-height 34px
   display inline-block
   text-align center
   white-space nowrap
   cursor pointer
-  transition $transition-duration__base
-  border $border-width__base solid transparent
+  transition $transition-duration_base
+  border $border-width_base solid transparent
   box-sizing border-box
   user-select none
 
   &:hover
-    opacity $opacity__strong
+    opacity $opacity_strong
 
 .button_disabled
-  opacity $opacity__weak
+  opacity $opacity_weak
 
   &:hover
-    opacity $opacity__weak
+    opacity $opacity_weak
 
 .button_borderless
   border-color transparent !important

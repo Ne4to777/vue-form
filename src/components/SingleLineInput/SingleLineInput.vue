@@ -1,10 +1,14 @@
 <template>
   <div class="single-line">
-		<Label v-if="title" :withAsterisk="required">{{title}}</Label>
-		<div class="single-line__wrapper">
+		<Label v-if="title" :with-asterisk="required" class="form-label_margin-bottom">{{title}}</Label>
+		<div
+			class="single-line__wrapper"
+			@click.stop="onInputClick"
+			:class="[{'single-line__wrapper_select-fix':!selectable}, selectable ? '' : classes]"
+		>
 	  	<input
         type="text"
-				v-model="content"
+				:value="content"
 				@input="onInput"
 				@focus="onFocus"
 				@blur="onBlur"
@@ -14,18 +18,24 @@
 				@keyup.ctrl.z="onUndo"
 				@keyup.ctrl.shift.z="onRedo"
         class="single-line__input"
-        :class="{'single-line__input_marked':message}"
-        :placeholder="placeholder"
+        :class="[{'single-line__input_marked':message}, classes]"
+        :placeholder="placeholder === false? '': disabled ? placeholderDisabled : placeholder"
         :disabled="disabled">
 				<transition name="fade">
 					<div class="single-line__message" v-if="message">{{message}}</div>
 				</transition>
-				<div
-					class="s-icon single-line__s-icon"
-					:class="[iconClass,{'s-icon_hover':!!onIconClick}]"
-					v-if="!!icon"
-					@click.prevent="onIconClick && onIconClick(arguments[0])">
+				<slot></slot>
+				<transition name="fade">
+					<div
+						class="s-icon single-line__s-icon"
+						:class="[iconClass,{'s-icon_hover':!!onIconClick}]"
+						v-if="!!icon && !disabled"
+						@click.stop.prevent="onIconClick && onIconClick(arguments[0])"
+						@mouseover="isIconHover=true"
+						@mouseleave="isIconHover=false"
+					>
 				</div>
+				</transition>
 		</div>
 	</div>
 </template>
@@ -34,30 +44,56 @@
 import Label from '@/components/Common/Label'
 import chargeMask from './mask'
 
+const MESSAGE = {
+	fillEmptyField: 'Заполните поле',
+	charExceeded: 'Превышение количества символов на'
+}
+const getTimeStamp = _ => new Date().getTime()
 export default {
 	props: {
 		disabled: { type: Boolean, default: false },
 		required: { type: Boolean, default: true },
 		title: String,
 		name: String,
-		placeholder: { type: String, default: 'Заполняется свободно...' },
+		trimmed: Boolean,
+		placeholder: { type: [String, Boolean], default: 'Заполняется свободно...' },
+		placeholderDisabled: { type: [String, Boolean], default: 'Ввод недоступен' },
 		max: Number,
-		initValue: { type: String, default: '' },
 		isValidateOnChange: { type: Boolean, default: true },
 		isValidateOnBlur: { type: Boolean, default: true },
 		isValidateOnIconClick: { type: Boolean, default: true },
 		validator: { type: Function },
 		mask: String,
-		icon: String
+		icon: String,
+		classes: null,
+		value: null,
+		selectable: { type: Boolean, default: true }
 	},
 	components: {
 		Label
 	},
+	watch: {
+		async value(x) {
+			this.validated = false
+			if (this.content !== x) {
+				this.content = x
+				this.prettify()
+				if (this.isValidateOnChange) {
+					this.lastInputTimeStamp = getTimeStamp()
+					await this.validate()
+				}
+				this.$emit('input', this.content)
+			}
+		}
+	},
 	data() {
 		return {
-			content: this.initValue,
+			content: this.prettify(this.value),
 			message: '',
-			validatedOnce: false
+			isIconHover: false,
+			lastInputTimeStamp: 0,
+			validated: false,
+			prettified: false
 		}
 	},
 	computed: {
@@ -69,67 +105,116 @@ export default {
 		getValue() {
 			return this.content
 		},
-		async validate() {
-			if (this.mask) {
-				if (this.required || this.content) this.content = chargeMask(this.mask)(this.content)
-				if (this.validator) this.message = await this.validator(this.content)
+		setValue(value) {
+			return (this.content = value)
+		},
+		prettify(value) {
+			const content = value === void 0 ? this.content : value
+			if (content !== void 0) {
+				let updatedContent = content
+				if (this.trimmed) {
+					const prettifiedContent = content.replace(/^\s{1,}|\s{1,}$/g, '')
+					if (content !== prettifiedContent) {
+						updatedContent = prettifiedContent
+						this.validated = false
+					}
+				}
+				if (this.mask) {
+					const prettifiedContent = chargeMask(this.mask)(content)
+					if (content !== prettifiedContent) {
+						updatedContent = prettifiedContent
+						this.validated = false
+					}
+				}
+				if (updatedContent !== this.content) this.content = updatedContent
 			}
-			if ((!this.isValidateOnChange || this.isValidateOnIconClick) && this.validator)
-				this.message = await this.validator(this.content)
-			if (this.required && !this.content) this.message = 'Заполните поле'
+			this.prettified = true
+			return this.content
+		},
+		async validate() {
+			let message = ''
+			if (this.validator) message = await this.validator(this.content)
+			if (this.required && !this.content && !message) message = MESSAGE.fillEmptyField
+			if (this.content && this.max < this.content.length && !message)
+				message = `${MESSAGE.charExceeded} ${this.content.length - this.max}`
+			if (this.lastInputTimeStamp <= new Date().getTime()) {
+				this.setMessage(message)
+				this.validated = true
+			}
+		},
+		setMessage(msg = '') {
+			if (msg !== this.message) this.message = msg
 		},
 		async confirm() {
-			if (!this.validatedOnce) await this.validate()
+			if (!this.prettified) this.prettify()
+			if (!this.validated) {
+				this.lastInputTimeStamp = getTimeStamp()
+				await this.validate()
+			}
 			return this.message ? void 0 : this.content
 		},
 		clear() {
 			this.content = ''
-			this.message = ''
+			this.validated = false
+			this.setMessage('')
 		},
 		reset() {
-			this.content = this.initValue
-			this.message = ''
+			this.content = this.value
+			this.validated = false
+			this.setMessage('')
 		},
 		async onInput(e) {
-			if (this.isValidateOnChange) {
-				if (this.validator) this.message = await this.validator(this.content)
-				if (this.required && !this.content) this.message = 'Заполните поле'
+			const content = e.target.value
+			if (this.content !== content) {
+				this.prettified = false
+				this.content = content
+				if (this.isValidateOnChange) {
+					this.lastInputTimeStamp = getTimeStamp()
+					await this.validate()
+				}
 			}
-			this.validatedOnce = true
 			this.$emit('input', this.content)
 		},
 		onFocus(e) {
-			if (!this.isValidateOnChange) this.message = ''
-			this.$emit('focus', this.content)
+			if (!this.isValidateOnChange) this.setMessage('')
+			this.$emit('focus', e.target.value)
 		},
 		async onBlur(e) {
-			if (this.isValidateOnBlur) await this.validate()
-			this.validatedOnce = true
-			this.$emit('blur', this.content)
+			if (!this.prettified) this.prettify()
+			if (!this.isIconHover) {
+				if (this.isValidateOnBlur && !this.validated) {
+					this.lastInputTimeStamp = getTimeStamp()
+					await this.validate()
+				}
+				this.$emit('blur', e.target.value)
+			}
 		},
 		onCopy(e) {
-			this.$emit('copy', this.content)
+			this.$emit('copy', e.target.value)
 		},
 		onCut(e) {
-			this.$emit('cut', this.content)
+			this.$emit('cut', e.target.value)
 		},
 		onPaste(e) {
-			this.$emit('paste', this.content)
+			this.$emit('paste', e.target.value)
 		},
 		onUndo(e) {
-			this.$emit('undo', this.content)
+			this.$emit('undo', e.target.value)
 		},
 		onRedo(e) {
-			this.$emit('redo', this.content)
+			this.$emit('redo', e.target.value)
 		},
 		async onIconClick(e) {
 			if (this.isValidateOnIconClick) {
+				this.lastInputTimeStamp = getTimeStamp()
 				await this.validate()
-				this.validatedOnce = true
-				!this.message && this.$emit('iconClick', this.content)
+				!this.message && this.$emit('icon-click', this.content)
 			} else {
-				this.$emit('iconClick', this.content)
+				this.$emit('icon-click', this.content)
 			}
+		},
+		onInputClick(e) {
+			this.$emit('input-click', this.content)
 		}
 	}
 }
@@ -139,36 +224,38 @@ export default {
 @import './../../assets/stylus/global.styl'
 
 .single-line
-	transition $transition-duration__base
+	transition $transition-duration_base
 
 .single-line__wrapper
 	position relative
-	transition $transition-duration__base
+	transition $transition-duration_base
 
 .single-line__input
-	padding 0 $padding__very-small
-	border $border-width__base solid $whisper
-	border-radius $border-radius__base
+	padding 0 $padding_very-small
+	border-width $border-width_base
+	border-style solid
+	border-color $whisper
+	border-radius $border-radius_base
 	background-color $white
 	height 34px
 	line-height 34px
-	font-size $font-size__very-small
+	font-size $font-size_very-small
 	width 100%
 	box-sizing border-box
 	outline none
-	transition border-color $transition-duration__fast
+	transition border-color $transition-duration_fast
 
 	&::placeholder
 		font-style italic
 		color $grey
 
 .single-line__input_marked
-	border $border-width__base solid $red !important
-	border-radius $border-radius__base
+	border $border-width_base solid $red !important
+	border-radius $border-radius_base
 
 .single-line__message
-	padding 0px $padding__very-small
-	font-size $font-size__extra-small
+	padding 0px $padding_very-small
+	font-size $font-size_extra-small
 	color $grey
 	position absolute
 	top -10px
@@ -187,12 +274,24 @@ export default {
 	top 13px
 	right 1px
 	margin -12px 0px 0px 0px
-	border-radius $border-radius__base
+	border-radius $border-radius_base
 	user-select none
 	z-index 4
 
+.single-line__wrapper_select-fix
+	position relative
+
+.single-line__wrapper_select-fix::after
+	content ''
+	display block
+	position absolute
+	top 0
+	left 0
+	width 100%
+	height 100%
+
 .fade-enter-active, .fade-leave-active
-	transition opacity $transition-duration__fast
+	transition opacity $transition-duration_fast
 
 .fade-enter, .fade-leave-to
 	opacity 0

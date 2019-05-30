@@ -9,11 +9,11 @@
 @import './../../assets/stylus/global.styl'
 
 .title
-	margin-bottom $margin__base
-	padding-bottom $padding__base
-	font-size $font-size__large
-	font-weight $font-weight__base
-	border-bottom $border-width__base solid $whisper
+	margin-bottom $margin_base
+	padding-bottom $padding_base
+	font-size $font-size_large
+	font-weight $font-weight_base
+	border-bottom $border-width_base solid $whisper
 	user-select none
 	line-height normal
 </style>

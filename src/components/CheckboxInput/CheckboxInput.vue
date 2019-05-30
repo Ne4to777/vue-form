@@ -1,15 +1,14 @@
 <template>
   <div class="checkbox">
-    <label class="checkbox__label">
+    <label class="checkbox__label" :class="disabled? 'cursor_not-allowed': 'cursor_pointer'">
 	  	<input
         type="checkbox"
-				v-model.lazy="checked"
-        @input="onClick"
+				:checked="checked"
         v-show="false"
         class="checkbox__input"
         :disabled="disabled"
-        value="none"
-        autocomplete="off">
+        @input="onInput"
+      >
           <span class="checkbox__fake-input">
             <transition name="fade">
               <div
@@ -30,11 +29,16 @@ export default {
 		disabled: { type: Boolean, default: false },
 		title: String,
 		name: String,
-		initValue: { type: Boolean, default: false }
+		value: Boolean
 	},
 	data() {
 		return {
-			checked: this.initValue
+			checked: this.value
+		}
+	},
+	watch: {
+		value(x) {
+			this.checked = x
 		}
 	},
 	methods: {
@@ -48,10 +52,11 @@ export default {
 			this.checked = false
 		},
 		reset() {
-			this.checked = this.initValue
+			this.checked = this.value
 		},
-		onClick(e) {
-			return e.target.checked
+		onInput(e) {
+			this.checked = e.target.checked
+			this.$emit('input', e.target.checked)
 		}
 	}
 }
@@ -60,15 +65,20 @@ export default {
 <style lang="stylus" scoped>
 @import './../../assets/stylus/global.styl'
 
-.checkbox__label
+.cursor_not-allowed
+  cursor not-allowed
+
+.cursor_pointer
   cursor pointer
+
+.checkbox__label
   overflow hidden
   display block
 
 .checkbox__fake-input
   width 14px
   height 14px
-  border 1px solid #DEDEDE
+  border 1px solid $lightgrey
   border-radius 4px
   position relative
   float left
@@ -89,11 +99,11 @@ export default {
   background-color $grey
 
 .checkbox__title
-  margin-left $margin__very-large
+  margin-left $margin_very-large
   user-select none
 
 .fade-enter-active, .fade-leave-active
-  transition opacity $transition-duration__base
+  transition opacity $transition-duration_base
 
 .fade-enter, .fade-leave-to
   opacity 0

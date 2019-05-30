@@ -15,11 +15,11 @@ export default {
 
 .label
   display inline-block
-  font-weight $font-weight__bold
+  font-weight $font-weight_bold
 
 .label_asterix:after
   content '*'
-  padding-left $padding__extra-small
-  font-weight $font-weight__bold
+  padding-left $padding_extra-small
+  font-weight $font-weight_bold
   color $red
 </style>
