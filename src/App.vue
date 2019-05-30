@@ -23,7 +23,7 @@
 			class="indented"
 		/>
 		<DroplistMultiInput
-			ref="DroplistInput"
+			ref="DroplistMultiInput"
 			:value="[3]"
 			:menuItems="colors"
 			:limit="6"
@@ -34,7 +34,7 @@
 			:editable="true"
 		/>
 		<SearchInput
-			ref="DroplistInput"
+			ref="SearchInput"
 			:value="[3]"
 			:menuItems="colors"
 			:limit="6"
@@ -105,14 +105,14 @@ export default {
 	},
 	methods: {
 		async onButtonClick() {
-			const input = this.$refs.DroplistInput
+			const input = this.$refs.DroplistMultiInput
 			console.log(await input.confirm())
-			setTimeout(() => {
-				input.clear()
-				setTimeout(() => {
-					input.reset()
-				}, 1000)
-			}, 1000)
+			// setTimeout(() => {
+			// 	input.clear()
+			// 	setTimeout(() => {
+			// 		input.reset()
+			// 	}, 1000)
+			// }, 1000)
 		},
 		singleInputValidator(value) {
 			return new Promise(resolve => {

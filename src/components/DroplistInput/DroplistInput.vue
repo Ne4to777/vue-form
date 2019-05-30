@@ -33,7 +33,7 @@ import SimpleMenuItem from '@/components/Common/SimpleMenuItem'
 import SingleLineInput from '@/components/SingleLineInput/SingleLineInput'
 
 const MESSAGE = {
-	fillEmptyField: 'Введите хотя бы одно значение',
+	fillEmptyField: 'Выберите хотя бы одно значение',
 	valueExists: 'Значение уже выбрано'
 }
 
@@ -86,6 +86,10 @@ export default {
 	},
 	methods: {
 		confirm() {
+			if (this.required && !this.activeItem) {
+				this.input.setMessage(MESSAGE.fillEmptyField)
+				return
+			}
 			return this.activeItem
 		},
 		clear() {
@@ -97,6 +101,7 @@ export default {
 			this.input.reset()
 		},
 		toggleMenu() {
+			this.input.setMessage('')
 			this.menuVisible = !this.menuVisible
 		},
 		clickItem(i) {

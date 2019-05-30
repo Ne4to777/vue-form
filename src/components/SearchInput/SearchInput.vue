@@ -95,6 +95,10 @@ export default {
 	},
 	methods: {
 		confirm() {
+			if (this.required && !this.activeItems.length) {
+				this.input.$refs.SingleLineInput.setMessage(MESSAGE.fillEmptyField)
+				return
+			}
 			return this.activeItems
 		},
 		clear() {
@@ -106,6 +110,7 @@ export default {
 			this.input.reset()
 		},
 		toggleMenu() {
+			this.input.$refs.SingleLineInput.setMessage('')
 			this.menuVisible = !this.menuVisible
 		},
 		clickItem(i) {

@@ -139,8 +139,11 @@ export default {
 		},
 		async confirm() {
 			await this.addTag()
-			if (this.required && !this.tagItems.length) this.singleLineInput.setMessage(MESSAGE.fillEmptyField)
-			return this.tagItems.length ? this.tagItems : void 0
+			if (this.required && !this.tagItems.length) {
+				this.singleLineInput.setMessage(MESSAGE.fillEmptyField)
+				return
+			}
+			return this.tagItems
 		},
 		clear() {
 			this.tagItems = []
