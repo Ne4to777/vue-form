@@ -3,7 +3,7 @@
 		<Label v-if="title" :with-asterisk="required" class="form-label_margin-bottom">{{title}}</Label>
 		<div
 			class="single-line__wrapper"
-			@click.stop="onInputClick"
+			@click="onInputClick"
 			:class="[{'single-line__wrapper_select-fix':!selectable}, selectable ? '' : classes]"
 		>
 	  	<input
@@ -29,7 +29,7 @@
 					<div
 						class="s-icon single-line__s-icon"
 						:class="[iconClass,{'s-icon_hover':!!onIconClick}]"
-						v-if="!!icon && !disabled"
+						v-if="!!icon && !disabled && isIconVisible"
 						@click.stop.prevent="onIconClick && onIconClick(arguments[0])"
 						@mouseover="isIconHover=true"
 						@mouseleave="isIconHover=false"
@@ -67,7 +67,8 @@ export default {
 		icon: String,
 		classes: null,
 		value: null,
-		selectable: { type: Boolean, default: true }
+		selectable: { type: Boolean, default: true },
+		isIconVisible: { type: Boolean, default: true }
 	},
 	components: {
 		Label
@@ -142,8 +143,14 @@ export default {
 				this.validated = true
 			}
 		},
+		getMessage() {
+			return this.message
+		},
 		setMessage(msg = '') {
 			if (msg !== this.message) this.message = msg
+		},
+		clearMessage() {
+			this.message = ''
 		},
 		async confirm() {
 			if (!this.prettified) this.prettify()
@@ -224,6 +231,7 @@ export default {
 @import './../../assets/stylus/global.styl'
 
 .single-line
+	min-width 40px
 	transition $transition-duration_base
 
 .single-line__wrapper
@@ -276,7 +284,7 @@ export default {
 	margin -12px 0px 0px 0px
 	border-radius $border-radius_base
 	user-select none
-	z-index 4
+	z-index 1
 
 .single-line__wrapper_select-fix
 	position relative

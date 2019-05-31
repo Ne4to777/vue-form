@@ -11,12 +11,22 @@
 			validator:="singleInputValidator"
 			:max="6"
 			icon="plus"
+			class="indented"
 			@iconClick="onIconClick"
+		/>
+		<MultiSelectInput
+			ref="MultiSelectInput"
+			:value="colors.slice(3)"
+			:limit="4"
+			type="simple"
+			title="multiselect"
+			class="indented"
+			:draggable="true"
 		/>
 		<DroplistInput
 			ref="DroplistInput"
 			:menuItems="colors"
-			:limit="6"
+			:limit="4"
 			type="simple"
 			title="droplist"
 			:draggable="true"
@@ -26,23 +36,24 @@
 			ref="DroplistMultiInput"
 			:value="[3]"
 			:menuItems="colors"
-			:limit="6"
+			:limit="4"
 			type="simple"
-			title="droplist"
+			title="droplistMulti"
 			:draggable="false"
 			class="indented"
 			:editable="true"
 		/>
 		<SearchInput
 			ref="SearchInput"
-			:value="[3]"
+			:value="[...colors.slice(0,1),...colors.slice(2,3),...colors.slice(4,5)]"
 			:menuItems="colors"
-			:limit="6"
+			:limit="4"
 			type="simple"
-			title="droplist"
+			title="search"
 			:draggable="false"
 			class="indented"
 			:editable="true"
+			:strict="true"
 		/>
 
 		<Button @click.native="onButtonClick"/>
@@ -105,7 +116,7 @@ export default {
 	},
 	methods: {
 		async onButtonClick() {
-			const input = this.$refs.DroplistMultiInput
+			const input = this.$refs.SearchInput
 			console.log(await input.confirm())
 			// setTimeout(() => {
 			// 	input.clear()
@@ -144,7 +155,7 @@ body
 	margin 0
 
 .indented
-	margin 100px
+	margin 10px 100px
 
 .s-icon
 	background-color $white

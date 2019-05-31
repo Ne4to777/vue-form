@@ -25,6 +25,7 @@
 			v-bind="inputOpts"
 			:placeholder="placeholder"
 			:placeholder-disabled="placeholderDisabled"
+			:is-icon-visible="isIconVisible"
 			@icon-click="addTag"
 			@input-click="$emit('input-click')"
 		><slot></slot></SingleLineInput>
@@ -62,7 +63,8 @@ export default {
 		draggable: { type: Boolean, default: false },
 		keyProperty: { type: null, default: 'value' },
 		classes: null,
-		isIconVisible: { type: Boolean, default: true }
+		isIconVisible: { type: Boolean, default: true },
+		iconClickValidator: Function
 	},
 	components: {
 		draggable,
@@ -153,20 +155,42 @@ export default {
 			this.tagItems = this.value
 			this.singleLineInput.reset()
 		},
+		getContent(el) {
+			return el.hasOwnProperty(this.keyProperty) ? el[this.keyProperty] : el
+		},
 		async addTag(tag) {
+			let value = tag
 			if (this.tagItemsMapped[tag]) return
 			const singleLineInput = this.singleLineInput
 			if (!this.limit || this.tagItems.length < this.limit) {
-				const value = tag === void 0 ? await singleLineInput.confirm() : tag
+				if (tag === void 0) {
+					value = await singleLineInput.confirm()
+				} else {
+					if (this.iconClickValidator) {
+						const message = await this.iconClickValidator(tag)
+						if (message) {
+							this.singleLineInput.setMessage(message)
+							value = void 0
+						}
+					}
+				}
 				if (value) {
 					this.tagItems = this.tagItems.concat(value)
 					singleLineInput.clear()
+					this.$emit('icon-click', this.tagItems)
 					this.$emit('input', this.tagItems)
 				}
 			}
 		},
 		async removeTag(index) {
+			if (
+				this.getContent(this.tagItems[index]) === this.singleLineInput.getValue() &&
+				this.singleLineInput.getMessage() === MESSAGE.valueExists
+			) {
+				this.singleLineInput.clearMessage()
+			}
 			this.tagItems = this.tagItems.slice(0, index).concat(this.tagItems.slice(index + 1))
+			this.$emit('remove', this.tagItems)
 			this.$emit('input', this.tagItems)
 		},
 		async inputValidator(value) {

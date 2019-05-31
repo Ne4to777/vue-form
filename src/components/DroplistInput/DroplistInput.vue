@@ -18,11 +18,10 @@
 		<div class="droplist__menu" v-if="menuItems.length && menuVisible">
 			<component
 				v-for="(item, i) in menuContentItems"
-				ref="MenuItem"
 				:is="types[type.toLowerCase()]"
 				:value="item"
-				:class="{'droplist__menu-item':activeIndex === i}"
-				@click.stop.native="clickItem(i)"
+				:class="[{'droplist__menu-item_selected':activeIndex === i},{'droplist__menu-item_focused':focusedItemIndex === i}]"
+				@click.native="clickItem(i)"
 			/>
 		</div>
 	</div>
@@ -38,10 +37,12 @@ const MESSAGE = {
 }
 
 export default {
-	mounted: function() {
+	mounted() {
 		document.addEventListener('click', this.onBodyClick)
+		document.addEventListener('keydown', this.onKeyDown)
+		this.input = this.$refs.SingleLineInput
 	},
-	beforeDestroy: function() {
+	beforeDestroy() {
 		document.removeEventListener('click', this.onBodyClick)
 	},
 	components: {
@@ -65,7 +66,8 @@ export default {
 				// user: UserCard,
 				simple: SimpleMenuItem
 			},
-			activeIndex: this.value
+			activeIndex: this.value,
+			focusedItemIndex: void 0
 		}
 	},
 	computed: {
@@ -79,9 +81,6 @@ export default {
 		},
 		menuContentItems() {
 			return this.menuItems.map(el => (el.hasOwnProperty(this.keyProperty) ? el[this.keyProperty] : el))
-		},
-		input() {
-			return this.$refs.SingleLineInput
 		}
 	},
 	methods: {
@@ -111,8 +110,34 @@ export default {
 				this.$emit('input', this.activeItem)
 			}
 		},
-		onBodyClick() {
-			this.menuVisible = false
+		onBodyClick(e) {
+			if (!this.$el.contains(e.target) || !/single-line_/.test(e.target.className)) {
+				this.menuVisible = false
+				this.focusedItemIndex = void 0
+			}
+		},
+		onKeyDown(e) {
+			if (this.menuVisible) {
+				if (e.key === 'ArrowDown') {
+					if (this.focusedItemIndex === void 0 || this.focusedItemIndex === this.menuItems.length - 1) {
+						this.focusedItemIndex = 0
+					} else {
+						this.focusedItemIndex += 1
+					}
+				}
+				if (e.key === 'ArrowUp') {
+					if (this.focusedItemIndex === void 0 || this.focusedItemIndex === 0) {
+						this.focusedItemIndex = this.menuItems.length - 1
+					} else {
+						this.focusedItemIndex -= 1
+					}
+				}
+			}
+			if (e.key === 'Enter' && this.focusedItemIndex !== void 0) {
+				this.activeIndex = this.focusedItemIndex
+				this.focusedItemIndex = void 0
+				this.menuVisible = false
+			}
 		},
 		onInput(value) {
 			// this.inputValue = value
@@ -131,6 +156,7 @@ export default {
 	position absolute
 	width 100%
 	max-height 400px
+	min-width 40px
 	background-color $white
 	border $border-width_base solid $whisper
 	border-top none
@@ -140,8 +166,11 @@ export default {
 	overflow-y auto
 	z-index 2
 
-.droplist__menu-item
+.droplist__menu-item_selected
 	background-color $ghostwhite
+
+.droplist__menu-item_focused
+	background-color $lightgrey
 
 .droplist__arrow-wrapper
 	position absolute

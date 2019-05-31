@@ -8,6 +8,7 @@
 	},
 	"dependencies": {
 		"core-js": "^2.6.5",
+		"regex": "^0.1.1",
 		"spx-com": "^1.0.27",
 		"vue": "^2.6.10",
 		"vue-router": "^3.0.3",

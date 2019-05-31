@@ -5,8 +5,8 @@
 			:value="activeItems"
 			:title="title"
 			:disabled="true"
-			:placeholder="placeholder"
-      :placeholder-disabled="placeholderDisabled"
+			:placeholder="placeholderComputed"
+      :placeholder-disabled="placeholderComputed"
 			:classes="[{cursor_pointer:true},{'border-radius_bottom-fix':menuVisible && menuItems.length}]"
       :is-icon-visible="false"
       :draggable="draggable"
@@ -16,10 +16,9 @@
 		<div class="droplist__menu" v-if="menuItems.length && menuVisible">
 			<component
 				v-for="(item, i) in menuContentItems"
-				ref="MenuItem"
 				:is="types[type.toLowerCase()]"
 				:value="item"
-				:class="{'droplist__menu-item':activeIndexes.some(el=>el===i)}"
+				:class="[{'droplist__menu-item_selected':activeIndexes.some(el=>el===i)},{'droplist__menu-item_focused':focusedItemIndex === i}]"
 				@click.stop.native="clickItem(i)"
 			/>
 		</div>
@@ -32,14 +31,18 @@ import MultiSelectInput from '@/components/MultiSelectInput/MultiSelectInput'
 
 const MESSAGE = {
 	fillEmptyField: 'Введите хотя бы одно значение',
-	valueExists: 'Значение уже выбрано'
+	valueExists: 'Значение уже выбрано',
+	disabled: 'Невозможно выбрать'
 }
 
 export default {
-	mounted: function() {
+	mounted() {
 		document.addEventListener('click', this.onBodyClick)
+		document.addEventListener('keydown', this.onKeyDown)
+		this.multiLineInput = this.$refs.MultiSelectInput
+		this.singleLineInput = this.$refs.MultiSelectInput.$refs.SingleLineInput
 	},
-	beforeDestroy: function() {
+	beforeDestroy() {
 		document.removeEventListener('click', this.onBodyClick)
 	},
 	components: {
@@ -55,7 +58,7 @@ export default {
 		keyProperty: { type: null, default: 'value' },
 		draggable: { type: Boolean, default: false },
 		placeholder: { type: String, default: 'Выберите элементы' },
-		placeholderDisabled: { type: String, default: 'Выберите элементы' }
+		limit: Number
 	},
 	data() {
 		return {
@@ -64,7 +67,8 @@ export default {
 				// user: UserCard,
 				simple: SimpleMenuItem
 			},
-			activeIndexes: this.value
+			activeIndexes: this.value,
+			focusedItemIndex: void 0
 		}
 	},
 	computed: {
@@ -86,47 +90,77 @@ export default {
 				return acc
 			}, {})
 		},
-		input() {
-			return this.$refs.MultiSelectInput
-		},
-		inputDisabled() {
-			return this.disabled || (this.limit && this.tagItems.length >= this.limit)
+		placeholderComputed() {
+			return this.limit && this.limit <= this.activeIndexes.length ? MESSAGE.disabled : this.placeholder
 		}
 	},
 	methods: {
 		confirm() {
 			if (this.required && !this.activeItems.length) {
-				this.input.$refs.SingleLineInput.setMessage(MESSAGE.fillEmptyField)
+				this.multiLineInput.$refs.SingleLineInput.setMessage(MESSAGE.fillEmptyField)
 				return
 			}
 			return this.activeItems
 		},
 		clear() {
 			this.activeIndexes = []
-			this.input.clear()
+			this.multiLineInput.clear()
 		},
 		reset() {
 			this.activeIndexes = this.value
-			this.input.reset()
+			this.multiLineInput.reset()
 		},
 		toggleMenu() {
-			this.input.$refs.SingleLineInput.setMessage('')
-			this.menuVisible = !this.menuVisible
+			this.multiLineInput.$refs.SingleLineInput.setMessage('')
+			if (this.limit) {
+				if (this.limit > this.activeIndexes.length) {
+					this.menuVisible = !this.menuVisible
+				}
+			} else {
+				this.menuVisible = !this.menuVisible
+			}
 		},
 		clickItem(i) {
 			this.menuVisible = false
-			if (!this.activeIndexesMapped[i]) {
-				this.input.addTag(this.menuContentItems[i])
+			if (!this.activeIndexesMapped[i] && (this.limit === void 0 ? true : this.activeItems.length < this.limit)) {
+				this.multiLineInput.addTag(this.menuContentItems[i])
 			}
 		},
-		onBodyClick() {
-			this.menuVisible = false
+		onBodyClick(e) {
+			if (!this.$el.contains(e.target) || e.target.tagName !== 'INPUT') {
+				this.menuVisible = false
+				this.focusedItemIndex = void 0
+			}
 		},
 		getContent(el) {
 			return el.hasOwnProperty(this.keyProperty) ? el[this.keyProperty] : el
 		},
+		onKeyDown(e) {
+			if (this.menuVisible) {
+				if (e.key === 'ArrowDown') {
+					if (this.focusedItemIndex === void 0 || this.focusedItemIndex === this.menuItems.length - 1) {
+						this.focusedItemIndex = 0
+					} else {
+						this.focusedItemIndex += 1
+					}
+				}
+				if (e.key === 'ArrowUp') {
+					if (this.focusedItemIndex === void 0 || this.focusedItemIndex === 0) {
+						this.focusedItemIndex = this.menuItems.length - 1
+					} else {
+						this.focusedItemIndex -= 1
+					}
+				}
+			}
+			if (e.key === 'Enter' && this.focusedItemIndex !== void 0) {
+				this.clickItem(this.focusedItemIndex)
+				// this.activeIndex = this.focusedItemIndex
+				this.focusedItemIndex = void 0
+				this.menuVisible = false
+			}
+		},
 		onInput(items) {
-			this.items = items
+			this.menuVisible = false
 			if (items.length >= this.activeIndexes.length) {
 				items.map(el => {
 					const content = this.getContent(el)
@@ -162,6 +196,7 @@ export default {
   position absolute
   width 100%
   max-height 400px
+  min-width 40px
   background-color $white
   border $border-width_base solid $whisper
   border-top none
@@ -171,8 +206,11 @@ export default {
   overflow-y auto
   z-index 2
 
-.droplist__menu-item
+.droplist__menu-item_selected
   background-color $ghostwhite
+
+.droplist__menu-item_focused
+  background-color $lightgrey
 
 .droplist__arrow-wrapper
   position absolute
