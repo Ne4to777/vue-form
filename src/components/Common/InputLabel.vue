@@ -1,5 +1,10 @@
 <template>
-  <label class="label" :class="{label_asterix:withAsterisk}"><slot></slot></label>
+  <label
+    class="label"
+    :class="{label_asterix:withAsterisk}"
+  >
+    <slot></slot>
+  </label>
 </template>
 
 <script>

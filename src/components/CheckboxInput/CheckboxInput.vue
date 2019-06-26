@@ -1,62 +1,42 @@
 <template>
-  <div class="checkbox">
-    <label class="checkbox__label" :class="disabled? 'cursor_not-allowed': 'cursor_pointer'">
+  <div class="checkbox-input">
+    <label class="checkbox-input__label" :class="current.disabled? 'cursor_not-allowed': 'cursor_pointer'">
 	  	<input
         type="checkbox"
-				:checked="checked"
+				:checked="current.value"
+        :disabled="current.disabled"
+        class="checkbox-input__input"
         v-show="false"
-        class="checkbox__input"
-        :disabled="disabled"
         @input="onInput"
       >
-          <span class="checkbox__fake-input">
-            <transition name="fade">
-              <div
-                class="checkbox__checker"
-                :class="disabled ? 'checkbox__checker_grey' : 'checkbox__checker_blue'"
-                v-show="checked">
-              </div>
-            </transition>
-          </span>
-				<div class="checkbox__title" for="checkbox__input">{{title}}</div>
-      </label>
+      <span class="checkbox-input__fake-input">
+        <transition name="fade">
+          <div
+            class="checkbox-input__checker"
+            :class="current.disabled ? 'checkbox-input__checker_grey' : 'checkbox-input__checker_blue'"
+            v-show="current.value">
+          </div>
+        </transition>
+      </span>
+		  <div class="checkbox-input__title" for="checkbox-input__input">{{title}}</div>
+    </label>
 	</div>
 </template>
 
 <script>
+import mixin from '@/components/Common/mixins/inputMixin'
 export default {
-	props: {
-		disabled: { type: Boolean, default: false },
-		title: String,
-		name: String,
-		value: Boolean
-	},
+	mixins: [mixin],
 	data() {
 		return {
-			checked: this.value
-		}
-	},
-	watch: {
-		value(x) {
-			this.checked = x
+			empty: {
+				value: false
+			}
 		}
 	},
 	methods: {
-		getValue() {
-			return this.checked
-		},
-		confirm() {
-			return this.checked
-		},
-		clear() {
-			this.checked = false
-		},
-		reset() {
-			this.checked = this.value
-		},
 		onInput(e) {
-			this.checked = e.target.checked
-			this.$emit('input', e.target.checked)
+			this.current.value = e.target.checked
 		}
 	}
 }
@@ -65,46 +45,40 @@ export default {
 <style lang="stylus" scoped>
 @import './../../assets/stylus/global.styl'
 
-.cursor_not-allowed
-  cursor not-allowed
+.checkbox-input__label
+	overflow hidden
+	display block
 
-.cursor_pointer
-  cursor pointer
+.checkbox-input__fake-input
+	width 14px
+	height 14px
+	border 1px solid $lightgrey
+	border-radius 4px
+	position relative
+	float left
 
-.checkbox__label
-  overflow hidden
-  display block
+.checkbox-input__checker
+	display block
+	position absolute
+	top 4px
+	right 4px
+	bottom 4px
+	left 4px
+	border-radius 2px
 
-.checkbox__fake-input
-  width 14px
-  height 14px
-  border 1px solid $lightgrey
-  border-radius 4px
-  position relative
-  float left
+.checkbox-input__checker_blue
+	background-color $blue
 
-.checkbox__checker
-  display block
-  position absolute
-  top 4px
-  right 4px
-  bottom 4px
-  left 4px
-  border-radius 2px
+.checkbox-input__checker_grey
+	background-color $grey
 
-.checkbox__checker_blue
-  background-color $blue
-
-.checkbox__checker_grey
-  background-color $grey
-
-.checkbox__title
-  margin-left $margin_very-large
-  user-select none
+.checkbox-input__title
+	margin-left $margin_very-large
+	user-select none
 
 .fade-enter-active, .fade-leave-active
-  transition opacity $transition-duration_base
+	transition opacity $transition-duration_base
 
 .fade-enter, .fade-leave-to
-  opacity 0
+	opacity 0
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="droplist">
-	  <SingleLineInput
+	  <single-line-input
 			ref="SingleLineInput"
 			:title="title"
 			:disabled="true"
@@ -14,7 +14,11 @@
 			customIcon=""
 			@input-click="toggleMenu"
 			@input="onInput"
-		><div class="droplist__arrow-wrapper"><div class="droplist__arrow" :class="{droplist__arrow_up:menuVisible}"></div></div></SingleLineInput>
+		>
+			<div class="droplist__arrow-wrapper">
+				<div class="droplist__arrow" :class="{droplist__arrow_up:menuVisible}"></div>
+			</div>
+		</single-line-input>
 		<div class="droplist__menu" v-if="menuItems.length && menuVisible">
 			<component
 				v-for="(item, i) in menuContentItems"

@@ -1,24 +1,16 @@
 <template>
   <span class="tag">
-    <span :class="{'tag_close-padding':closableComp}">{{content}}</span>
-    <span v-if="closableComp" @click.stop="$emit('remove')" class="tag__close"></span>
+    <span class="tag__value" :class="{'tag_close-padding':closable}">
+      <slot></slot>
+    </span>
+    <span v-if="closable" @click="$emit('close')" class="tag__close"></span>
   </span>
 </template>
 
 <script>
 export default {
 	props: {
-		value: null,
-		closable: { type: Boolean, default: true },
-		keyProperty: { type: null, default: 'value' }
-	},
-	computed: {
-		closableComp() {
-			return this.closable === false ? false : typeof this.value.closable === 'boolean' ? this.value.closable : true
-		},
-		content() {
-			return this.value.hasOwnProperty(this.keyProperty) ? this.value[this.keyProperty] : this.value
-		}
+		closable: { type: Boolean, default: false }
 	}
 }
 </script>
@@ -41,6 +33,11 @@ export default {
   color $black
   font-size $font-size_extra-small
   user-select none
+
+.tag__value:empty:after
+  content 'Пусто'
+  font-style italic
+  color $grey
 
 .tag_close-padding
   padding-right 15px

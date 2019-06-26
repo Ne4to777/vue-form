@@ -435,3 +435,6 @@ export const log = (...args) => {
   console.log('------- End')
   return args.length > 1 ? args : args[0]
 }
+
+
+export const getTimeStamp = _ => new Date().getTime()

@@ -3,23 +3,26 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"serve": "node dev/init.js && vue-cli-service serve",
+		"serve": "node dev/init.js && vue-cli-service serve --host localhost",
 		"build": "vue-cli-service build --production"
 	},
 	"dependencies": {
-		"core-js": "^2.6.5",
+		"@babel/polyfill": "^7.4.4",
+		"core-js": "^2.6.9",
+		"inputmask-core": "^2.2.0",
 		"regex": "^0.1.1",
 		"spx-com": "^1.0.27",
 		"vue": "^2.6.10",
 		"vue-router": "^3.0.3",
-		"vuedraggable": "^2.21.0",
+		"vue2-datepicker": "git+https://github.com/JoaoPedroAS51/vue2-datepicker.git#custom",
+		"vuedraggable": "^2.23.0",
 		"vuex": "^3.0.1"
 	},
 	"devDependencies": {
-		"@vue/cli-plugin-babel": "^3.7.0",
-		"@vue/cli-service": "^3.7.0",
-		"cpass": "^2.1.0",
-		"sp-rest-proxy": "^2.8.8",
+		"@vue/cli-plugin-babel": "^3.8.0",
+		"@vue/cli-service": "^3.8.4",
+		"cpass": "^2.1.1",
+		"sp-rest-proxy": "^2.8.9",
 		"stylus": "^0.54.5",
 		"stylus-loader": "^3.0.2",
 		"vue-template-compiler": "^2.5.21"

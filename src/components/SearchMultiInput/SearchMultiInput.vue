@@ -1,10 +1,10 @@
 <template>
   <div class="droplist">
-		<single-line-input
-			ref="SingleLineInput"
+		<multi-select-input
+			ref="MultiSelectInput"
 			:title="title"
-			v-model="content"
-			:init-value="content"
+			v-model="items"
+			:init-value="items"
 			:required="required"
 			:placeholder="placeholder"
       :placeholder-disabled="placeholderDisabled"
@@ -19,6 +19,8 @@
 			:icon="icon"
 			:selectable="selectable"
 			:isIconVisible="isIconVisible"
+      :key-property="keyProperty"
+      :content-property="contentProperty"
 			@input-click="menuVisible = true"
 			@input="onInput"
 			@blur="onBlur"
@@ -32,6 +34,7 @@
 			:key-property="keyProperty"
 			:content-property="contentProperty"
 			:focusedKey="focusedKey"
+      :active="value"
 			@click="onMenuItemClick"
 			@mouseover.native="menuHover = true"
 			@mouseleave.native="menuHover = false"
@@ -42,7 +45,7 @@
 <script>
 import { getTimeStamp } from '@/assets/utility'
 import DroplistMenu from '@/components/Common/DroplistMenu'
-import SingleLineInput from '@/components/SingleLineInput/SingleLineInput'
+import MultiSelectInput from '@/components/MultiSelectInput/MultiSelectInput'
 
 const MESSAGE = {
 	fillEmptyField: 'Введите значение',
@@ -52,12 +55,12 @@ const MESSAGE = {
 
 export default {
 	mounted() {
-		this.singleLineInput = this.$refs.SingleLineInput
+		this.multiSelectInput = this.$refs.MultiSelectInput
 		this.droplistMenu = this.$refs.DroplistMenu
 	},
 	components: {
 		DroplistMenu,
-		SingleLineInput
+		MultiSelectInput
 	},
 	props: {
 		value: null,
@@ -81,16 +84,22 @@ export default {
 		selectable: { type: Boolean, default: true },
 		isIconVisible: { type: Boolean, default: true },
 		keyProperty: { type: null, default: 'value' },
-		contentProperty: String,
+		contentProperty: [Array, String],
 		searchProperty: { type: [Array, String], default: 'value' }
 	},
 	data() {
 		return {
+			active: this.initValue,
+			items: this.menuItems.filter(el => {
+				for (const item of this.initValue) {
+					if (el[this.keyProperty] === item) return true
+				}
+				return false
+			}),
 			menuVisible: false,
 			dataInitValue: [].concat(this.initValue),
 			dataInitMenuItems: [].concat(this.menuItems),
 			menuItemsFiltered: [].concat(this.menuItems),
-			content: '',
 			focusedKey: void 0,
 			focusedIndex: void 0,
 			menuHover: false,
@@ -108,7 +117,7 @@ export default {
 	},
 	methods: {
 		getValue() {
-			const value = this.singleLineInput.getValue()
+			const value = this.multiSelectInput.getValue()
 			if (value && this.menuItemsFiltered.length) {
 				const children = this.droplistMenu.$children
 				if (this.menuItemsFiltered.length === 1) {
@@ -123,8 +132,8 @@ export default {
 			}
 		},
 		async validate() {
-			const value = await this.singleLineInput.getValue()
-			let message = this.singleLineInput.message
+			const value = await this.multiSelectInput.getValue()
+			let message = this.multiSelectInput.message
 			if (!this.menuItemsFiltered.length) {
 				if (this.required) message = MESSAGE.valueNotExists
 			} else {
@@ -140,7 +149,7 @@ export default {
 				}
 			}
 			if (this.lastValidateTimeStamp <= getTimeStamp()) {
-				this.singleLineInput.setMessage(message)
+				this.multiSelectInput.setMessage(message)
 				if (!message) this.validated = true
 			}
 		},
@@ -152,13 +161,14 @@ export default {
 			return this.validated ? this.getValue() : void 0
 		},
 		clear() {
-			this.singleLineInput.clear()
-			this.content = ''
+			this.multiSelectInput.clear()
+			this.active = []
+			this.items = []
 			this.menuItemsFiltered = this.dataInitMenuItems
 		},
 		reset() {
-			this.singleLineInput.reset()
-			this.content = ''
+			this.multiSelectInput.reset()
+			this.active = this.initValue
 			this.menuItemsFiltered = this.dataInitMenuItems
 		},
 		getFilteredItems(value) {
@@ -185,12 +195,14 @@ export default {
 				: this.menuItems
 		},
 		onInput(value) {
+			console.log(value)
 			this.validated = false
 			this.menuItemsFiltered = this.getFilteredItems(value)
 		},
 		onMenuItemClick(value, content) {
-			this.singleLineInput.clearMessage()
-			this.content = content
+			this.multiSelectInput.clearMessage()
+			this.items = this.items.concat(value)
+			this.active = this.active.concat(value[this.keyProperty])
 			this.menuHover = false
 			this.menuVisible = false
 		},

@@ -1,5 +1,12 @@
 <template>
-  <div class="button" :class="[{button_disabled:disabled, button_borderless:borderless},className]">{{title}}</div>
+  <div 
+    class="button" 
+    :class="[{button_disabled:disabled, button_borderless:borderless},className]"
+    @click="disabled ? $emit('click-disabled') :$emit('click')"
+    @mouseover="disabled ? $emit('mouseover-disabled') : $emit('mouseover')"
+    @mouseout="disabled ? $emit('mouseout-disabled') : $emit('mouseout')"
+    @dblclick="disabled ? $emit('dblclick-disabled') : $emit('dblclick')"
+   >{{value}}</div>
 </template>
 
 <script>
@@ -21,7 +28,7 @@ export default {
 			type: Boolean,
 			default: false
 		},
-		title: {
+		value: {
 			type: String,
 			default: 'Ок'
 		}
@@ -30,8 +37,7 @@ export default {
 		return {
 			className: `button_${this.filled ? 'solid' : 'thin'}-${this.color}`
 		}
-	},
-	methods: {}
+	}
 }
 </script>
 
@@ -57,6 +63,7 @@ export default {
 
 .button_disabled
   opacity $opacity_weak
+  cursor not-allowed
 
   &:hover
     opacity $opacity_weak

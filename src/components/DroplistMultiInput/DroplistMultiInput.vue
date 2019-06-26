@@ -1,6 +1,6 @@
 <template>
   <div class="droplist">
-		<MultiSelectInput
+		<multi-select-input
 			ref="MultiSelectInput"
 			:value="activeItems"
 			:title="title"
@@ -12,7 +12,11 @@
       :draggable="draggable"
 			@input-click="toggleMenu"
 			@input="onInput"
-		><div class="droplist__arrow-wrapper"><div class="droplist__arrow" :class="{droplist__arrow_up:menuVisible}"></div></div></MultiSelectInput>
+		>
+			<div class="droplist__arrow-wrapper">
+				<div class="droplist__arrow" :class="{droplist__arrow_up:menuVisible}"></div>
+			</div>
+		</multi-select-input>
 		<div class="droplist__menu" v-if="menuItems.length && menuVisible">
 			<component
 				v-for="(item, i) in menuContentItems"
@@ -190,56 +194,56 @@ export default {
 @import './../../assets/stylus/global.styl'
 
 .droplist
-  position relative
+	position relative
 
 .droplist__menu
-  position absolute
-  width 100%
-  max-height 400px
-  min-width 40px
-  background-color $white
-  border $border-width_base solid $whisper
-  border-top none
-  border-radius 0 0 $border-radius_base $border-radius_base
-  box-shadow $shadow_base
-  box-sizing border-box
-  overflow-y auto
-  z-index 2
+	position absolute
+	width 100%
+	max-height 400px
+	min-width 40px
+	background-color $white
+	border $border-width_base solid $whisper
+	border-top none
+	border-radius 0 0 $border-radius_base $border-radius_base
+	box-shadow $shadow_base
+	box-sizing border-box
+	overflow-y auto
+	z-index 2
 
 .droplist__menu-item_selected
-  background-color $ghostwhite
+	background-color $ghostwhite
 
 .droplist__menu-item_focused
-  background-color $lightgrey
+	background-color $lightgrey
 
 .droplist__arrow-wrapper
-  position absolute
-  top 1px
-  bottom 1px
-  right 1px
-  width 30px
-  z-index 1
-  background-color $white
-  border-radius $border-radius_base
-  transition all $transition-duration_base
+	position absolute
+	top 1px
+	bottom 1px
+	right 1px
+	width 30px
+	z-index 1
+	background-color $white
+	border-radius $border-radius_base
+	transition all $transition-duration_base
 
 .droplist__arrow
-  position relative
-  display inline-block
-  top 6px
-  right -6px
-  border-top 6px solid $whisper
-  border-left 6px solid transparent
-  border-right 6px solid transparent
-  transform-origin 50% 40%
-  transition all $transition-duration_base
+	position relative
+	display inline-block
+	top 6px
+	right -6px
+	border-top 6px solid $whisper
+	border-left 6px solid transparent
+	border-right 6px solid transparent
+	transform-origin 50% 40%
+	transition all $transition-duration_base
 
 .droplist__arrow_up
-  transform rotate(180deg)
+	transform rotate(180deg)
 
 .fade-enter-active, .fade-leave-active
-  transition all $transition-duration_fast
+	transition all $transition-duration_fast
 
 .fade-enter, .fade-leave-to
-  opacity 0
+	opacity 0
 </style>

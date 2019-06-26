@@ -1,10 +1,10 @@
 <template>
   <div class="multiselect-input">
-		<Label
+		<input-label
 			v-if="title"
 			class="form-label_margin-bottom"
 			:with-asterisk="required"
-		>{{title}}</Label>
+		>{{title}}</input-label>
 		<div class="multiselect-input__tags" v-show="tagItems.length" key="tags">
 			<draggable v-model="tagItems" v-bind="dragOpts">
  				<component
@@ -14,12 +14,14 @@
 					class="multiselect-input__tag"
 					:value="item"
 					:class="{'cursor_pointer':draggable}"
+					:key-property="keyProperty"
+					:content-property="contentProperty"
 					:closable="true"
-					@remove="removeTag(i)"
+					@remove="removeTag"
 				/>
 			</draggable>
   	</div>
-	  <SingleLineInput
+	  <single-line-input
 			ref="SingleLineInput"
 			:classes="classes"
 			v-bind="inputOpts"
@@ -28,13 +30,14 @@
 			:is-icon-visible="isIconVisible"
 			@icon-click="addTag"
 			@input-click="$emit('input-click')"
-		><slot></slot></SingleLineInput>
+		><slot></slot></single-line-input>
 	</div>
 </template>
 
 <script>
+import { getTimeStamp } from '@/assets/utility'
 import draggable from 'vuedraggable'
-import Label from '@/components/Common/Label'
+import InputLabel from '@/components/Common/InputLabel'
 import Tag from '@/components/Common/Tag'
 import UserCard from '@/components/Common/UserCard'
 import SingleLineInput from '@/components/SingleLineInput/SingleLineInput'
@@ -58,17 +61,19 @@ export default {
 		validator: { type: Function },
 		mask: String,
 		limit: Number,
-		value: { type: null, dafult: [] },
+		value: { type: null, dafult: _ => [] },
+		initValue: null,
 		type: { type: String, default: 'simple' },
 		draggable: { type: Boolean, default: false },
 		keyProperty: { type: null, default: 'value' },
+		contentProperty: String,
 		classes: null,
 		isIconVisible: { type: Boolean, default: true },
 		iconClickValidator: Function
 	},
 	components: {
 		draggable,
-		Label,
+		InputLabel,
 		Tag,
 		UserCard,
 		SingleLineInput
@@ -78,39 +83,35 @@ export default {
 	},
 	data() {
 		return {
-			tagItems: this.value,
+			tagItems: this.initValue,
+			dataInitValue: [].concat(this.initValue),
 			types: {
 				user: UserCard,
 				simple: Tag
 			},
-			drag: false
+			drag: false,
+			validated: false,
+			lastValidateTimeStamp: 0
 		}
 	},
 	watch: {
-		value(x, y) {
-			if (x.length !== y.length) {
-				this.tagItems = x
-			} else {
-				for (let i = 0; i < x.length; i++) {
-					if (x[i] !== y[i]) {
-						this.tagItems = x
-						return
-					}
-				}
-			}
+		value(x) {
+			this.tagItems = x
+		},
+		tagItems: {
+			handler(x) {
+				this.validated = false
+				this.$emit('input', x)
+			},
+			deep: true
 		}
 	},
 	computed: {
 		tagItemsMapped() {
-			const o = {}
-			for (const item of this.tagItems) {
-				if (typeof item === 'object') {
-					o[item[this.keyProperty]] = true
-				} else {
-					o[item] = true
-				}
-			}
-			return o
+			return this.tagItems.reduce((acc, el, i) => {
+				acc[this.getKeyValue(el)] = i
+				return acc
+			}, {})
 		},
 		inputDisabled() {
 			return this.disabled || (this.limit && this.tagItems.length >= this.limit)
@@ -139,28 +140,47 @@ export default {
 		getValue() {
 			return this.tagItems
 		},
-		async confirm() {
+		setValue(x) {
+			this.tagItems = x
+		},
+		async validate() {
+			let message = ''
 			await this.addTag()
 			if (this.required && !this.tagItems.length) {
-				this.singleLineInput.setMessage(MESSAGE.fillEmptyField)
-				return
+				message = MESSAGE.fillEmptyField
 			}
-			return this.tagItems
+			if (this.lastValidateTimeStamp <= getTimeStamp()) {
+				this.singleLineInput.setMessage(message)
+				if (!message) this.validated = true
+			}
+		},
+		async confirm() {
+			if (!this.validated) {
+				this.lastValidateTimeStamp = getTimeStamp()
+				await this.validate()
+			}
+			return this.validated ? this.getValue() : void 0
 		},
 		clear() {
 			this.tagItems = []
 			this.singleLineInput.clear()
 		},
 		reset() {
-			this.tagItems = this.value
-			this.singleLineInput.reset()
+			this.tagItems = this.dataInitValue
+			this.singleLineInput.clear()
 		},
-		getContent(el) {
+		clearMessage() {
+			this.singleLineInput.clearMessage()
+		},
+		setMessage(msg) {
+			this.singleLineInput.setMessage(msg)
+		},
+		getKeyValue(el) {
 			return el.hasOwnProperty(this.keyProperty) ? el[this.keyProperty] : el
 		},
 		async addTag(tag) {
 			let value = tag
-			if (this.tagItemsMapped[tag]) return
+			if (this.tagItemsMapped[tag] !== void 0) return
 			const singleLineInput = this.singleLineInput
 			if (!this.limit || this.tagItems.length < this.limit) {
 				if (tag === void 0) {
@@ -169,7 +189,7 @@ export default {
 					if (this.iconClickValidator) {
 						const message = await this.iconClickValidator(tag)
 						if (message) {
-							this.singleLineInput.setMessage(message)
+							singleLineInput.setMessage(message)
 							value = void 0
 						}
 					}
@@ -177,24 +197,24 @@ export default {
 				if (value) {
 					this.tagItems = this.tagItems.concat(value)
 					singleLineInput.clear()
-					this.$emit('icon-click', this.tagItems)
-					this.$emit('input', this.tagItems)
+					this.$emit('add', value)
 				}
 			}
 		},
-		async removeTag(index) {
+		async removeTag(tag) {
+			const index = this.tagItemsMapped[tag]
+			const itemToRemove = this.tagItems[index]
 			if (
-				this.getContent(this.tagItems[index]) === this.singleLineInput.getValue() &&
+				this.getKeyValue(itemToRemove) === this.singleLineInput.getValue() &&
 				this.singleLineInput.getMessage() === MESSAGE.valueExists
 			) {
 				this.singleLineInput.clearMessage()
 			}
 			this.tagItems = this.tagItems.slice(0, index).concat(this.tagItems.slice(index + 1))
-			this.$emit('remove', this.tagItems)
-			this.$emit('input', this.tagItems)
+			this.$emit('remove', itemToRemove)
 		},
 		async inputValidator(value) {
-			if (this.tagItemsMapped[value]) return MESSAGE.valueExists
+			if (this.tagItemsMapped[value] !== void 0) return MESSAGE.valueExists
 			return this.validator ? await this.validator(value) : void 0
 		}
 	}
@@ -209,7 +229,6 @@ export default {
 
 .multiselect-input__tags
 	position relative
-	// max-width 200px
 	margin-left - $margin_very-small
 	transition all 1s
 
