@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "install": "npm i && npm run fix:sweeper",
     "fix:sweeper": "node sweeper/replace.js && cp node_modules/@vue/cli-service/lib/config/index-default.html node_modules/@vue/cli-service/lib/config/index-default.xhtml",
     "serve": "node dev/init.js && vue-cli-service serve --host localhost",
     "build": "vue-cli-service build --production"
