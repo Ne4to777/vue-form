@@ -1,30 +1,31 @@
 {
-	"name": "vue",
-	"version": "0.1.0",
-	"private": true,
-	"scripts": {
-		"serve": "node dev/init.js && vue-cli-service serve --host localhost",
-		"build": "vue-cli-service build --production"
-	},
-	"dependencies": {
-		"@babel/polyfill": "^7.4.4",
-		"core-js": "^2.6.9",
-		"inputmask-core": "^2.2.0",
-		"regex": "^0.1.1",
-		"spx-com": "^1.0.27",
-		"vue": "^2.6.10",
-		"vue-router": "^3.0.3",
-		"vue2-datepicker": "git+https://github.com/JoaoPedroAS51/vue2-datepicker.git#custom",
-		"vuedraggable": "^2.23.0",
-		"vuex": "^3.0.1"
-	},
-	"devDependencies": {
-		"@vue/cli-plugin-babel": "^3.8.0",
-		"@vue/cli-service": "^3.8.4",
-		"cpass": "^2.1.1",
-		"sp-rest-proxy": "^2.8.9",
-		"stylus": "^0.54.5",
-		"stylus-loader": "^3.0.2",
-		"vue-template-compiler": "^2.5.21"
-	}
+  "name": "vue",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "fix:sweeper": "node sweeper/replace.js && cp node_modules/@vue/cli-service/lib/config/index-default.html node_modules/@vue/cli-service/lib/config/index-default.xhtml",
+    "serve": "node dev/init.js && vue-cli-service serve --host localhost",
+    "build": "vue-cli-service build --production"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.4.4",
+    "@vue/cli-service": "^3.9.2",
+    "core-js": "^2.6.9",
+    "inputmask-core": "^2.2.0",
+    "regex": "^0.1.1",
+    "spx-com": "^1.0.27",
+    "vue": "^2.6.10",
+    "vue-router": "^3.0.3",
+    "vue2-datepicker": "git+https://github.com/JoaoPedroAS51/vue2-datepicker.git#custom",
+    "vuedraggable": "^2.23.0",
+    "vuex": "^3.0.1"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.8.0",
+    "cpass": "^2.1.1",
+    "sp-rest-proxy": "^2.8.9",
+    "stylus": "^0.54.5",
+    "stylus-loader": "^3.0.2",
+    "vue-template-compiler": "^2.5.21"
+  }
 }
