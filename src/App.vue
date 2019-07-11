@@ -9,7 +9,7 @@
 			:disabled="false"
 		/> -->
 		<!-- <default-button @click="onCheckboxButtonClick"/> -->
-		<!-- <single-line-input 
+		<!-- <single-line-input
 			ref="SingleLineInput"
 			title="Hi"
 			v-model="singleInputValue"
@@ -17,7 +17,7 @@
 			mask="11.11.11"
 			icon="magnifier"
 		/> -->
-		<!-- <date-time-input 
+		<!-- <date-time-input
 			ref="SingleLineInput"
 			title="Hi"
 			v-model="dateTimeValue"
@@ -28,7 +28,7 @@
 			:is-range="false"
 			:required="true"
 		/> -->
-		<coordinates-input 
+		<coordinates-input
 			ref="SingleLineInput"
 			title="Hi"
 			v-model="dateTimeValue"
@@ -39,8 +39,8 @@
 			:is-range="false"
 			:required="true"
 		/>
-		<default-button @click="onSingleLineClick"/>
-		<!-- <multi-select-input 
+		<default-button @click="onSingleLineClick" />
+		<!-- <multi-select-input
 			ref="MultiSelectInput"
 			name="MultiSelectInput"
 			title="Hello"
@@ -84,8 +84,8 @@
 				<span v-for="fill in fills">
 					<span v-for="disabled in disables">
 						<span v-for="borderless in [true,false]">
-							<default-button 
-								@click="onButtonClick(arguments[0])" 
+							<default-button
+								@click="onButtonClick(arguments[0])"
 								:filled="fill"
 								:color="color"
 								:disabled="disabled"
@@ -101,53 +101,59 @@
 </template>
 
 <script>
-import SingleLineInput from '@/components/SingleLineInput/SingleLineInput'
-import DateTimeInput from '@/components/DateTimeInput/DateTimeInput'
+// import SingleLineInput from '@/components/SingleLineInput/SingleLineInput'
+// import DateTimeInput from '@/components/DateTimeInput/DateTimeInput'
 import CoordinatesInput from '@/components/CoordinatesInput/CoordinatesInput'
-import HtmlInput from '@/components/HtmlInput/HtmlInput'
-import DescriptionInput from '@/components/DescriptionInput/DescriptionInput'
-import QuestionInput from '@/components/QuestionInput/QuestionInput'
-import CheckboxInput from '@/components/CheckboxInput/CheckboxInput'
-import DroplistInput from '@/components/DroplistInput/DroplistInput'
-import DroplistMultiInput from '@/components/DroplistMultiInput/DroplistMultiInput'
-import MultiSelectInput from '@/components/MultiSelectInput/MultiSelectInput'
-import SearchInput from '@/components/SearchInput/SearchInput'
-import SearchMultiInput from '@/components/SearchMultiInput/SearchMultiInput'
-import ModelInputParent from '@/components/ModelInputParent/ModelInputParent'
-import Title from '@/components/Common/Title'
-import Tag from '@/components/Common/Tag'
-import InputLabel from '@/components/Common/InputLabel'
+// import HtmlInput from '@/components/HtmlInput/HtmlInput'
+// import DescriptionInput from '@/components/DescriptionInput/DescriptionInput'
+// import QuestionInput from '@/components/QuestionInput/QuestionInput'
+// import CheckboxInput from '@/components/CheckboxInput/CheckboxInput'
+// import DroplistInput from '@/components/DroplistInput/DroplistInput'
+// import DroplistMultiInput from '@/components/DroplistMultiInput/DroplistMultiInput'
+// import MultiSelectInput from '@/components/MultiSelectInput/MultiSelectInput'
+// import SearchInput from '@/components/SearchInput/SearchInput'
+// import SearchMultiInput from '@/components/SearchMultiInput/SearchMultiInput'
+// import ModelInputParent from '@/components/ModelInputParent/ModelInputParent'
+// import Title from '@/components/Common/Title'
+// import Tag from '@/components/Common/Tag'
+// import InputLabel from '@/components/Common/InputLabel'
 import DefaultButton from '@/components/Common/DefaultButton'
-import UserCard from '@/components/Common/UserCard'
+// import UserCard from '@/components/Common/UserCard'
 
 const idle = _ => new Promise(resolve => setTimeout(_ => resolve(), 500))
 
 export default {
 	name: 'aura-form',
 	components: {
-		Title,
-		Tag,
-		UserCard,
-		InputLabel,
+		// Title,
+		// Tag,
+		// UserCard,
+		// InputLabel,
 		DefaultButton,
-		SingleLineInput,
-		DateTimeInput,
-		CoordinatesInput,
-		DescriptionInput,
-		QuestionInput,
-		CheckboxInput,
-		DroplistInput,
-		DroplistMultiInput,
-		MultiSelectInput,
-		SearchInput,
-		SearchMultiInput,
-		HtmlInput,
-		ModelInputParent
+		// SingleLineInput,
+		// DateTimeInput,
+		CoordinatesInput
+		// DescriptionInput,
+		// QuestionInput,
+		// CheckboxInput,
+		// DroplistInput,
+		// DroplistMultiInput,
+		// MultiSelectInput,
+		// SearchInput,
+		// SearchMultiInput,
+		// HtmlInput,
+		// ModelInputParent
 	},
 	data() {
 		return {
 			buttonColors: ['blue', 'grey', 'green', 'lightgreen', 'red'],
-			colors: ['blue', 'grey', 'green', 'lightgreen', { value: 'red', closable: false }],
+			colors: [
+				'blue',
+				'grey',
+				'green',
+				'lightgreen',
+				{ value: 'red', closable: false }
+			],
 			fills: [true, false],
 			disables: [true, false],
 			singleInputValue: '+1 (345) 534-53-45',
@@ -162,7 +168,13 @@ export default {
 				{ val1: 'three', val2: 'hi3', key: 3 }
 			],
 			required: true,
-			multiSelectInputValue: ['blue', 'grey', 'green', 'lightgreen', { value: 'red', closable: false }],
+			multiSelectInputValue: [
+				'blue',
+				'grey',
+				'green',
+				'lightgreen',
+				{ value: 'red', closable: false }
+			],
 			dateTimeValue: new Date()
 		}
 	},
@@ -205,7 +217,11 @@ export default {
 		},
 		singleInputValidator(value) {
 			return new Promise((resolve, reject) =>
-				setTimeout(() => (/_/.test(value) ? reject('Дозаполните') : resolve(value)), 500)
+				setTimeout(
+					() =>
+						/_/.test(value) ? reject(new Error('Дозаполните')) : resolve(value),
+					500
+				)
 			)
 		},
 		onIconClick() {
@@ -220,27 +236,32 @@ export default {
 </script>
 
 <style lang="stylus">
-@import './assets/stylus/fonts.styl'
-@import './assets/stylus/global.styl'
-@import './assets/stylus/icons.styl'
+@import './assets/stylus/fonts.styl';
+@import './assets/stylus/global.styl';
+@import './assets/stylus/icons.styl';
 
-body
-	font-family Roboto
-	font-weight $font-weight_base
-	font-size $font-size_very-small
-	margin 0
+body {
+	font-family: Roboto;
+	font-weight: $font-weight_base;
+	font-size: $font-size_very-small;
+	margin: 0;
+}
 
-.indented
-	margin 10px 100px
+.indented {
+	margin: 10px 100px;
+}
 
-.indented>*
-	margin 20px 0
+.indented>* {
+	margin: 20px 0;
+}
 
-.s-icon
-	background-color $white
-	color $grey
+.s-icon {
+	background-color: $white;
+	color: $grey;
+}
 
-.s-icon_hover:active, .s-icon_hover:hover
-	color $blue
-	cursor pointer
+.s-icon_hover:active, .s-icon_hover:hover {
+	color: $blue;
+	cursor: pointer;
+}
 </style>

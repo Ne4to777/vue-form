@@ -5,7 +5,7 @@ import SPXPlugin from './plugins/spx'
 
 Vue.config.productionTip = false
 
-Vue.use(SPXPlugin);
+Vue.use(SPXPlugin)
 
 new Vue({
 	store,
