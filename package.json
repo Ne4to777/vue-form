@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
-    "@vue/cli-service": "^3.9.2",
+    "@vue/cli-service": "^5.0.8",
     "core-js": "^2.6.9",
     "inputmask-core": "^2.2.0",
     "regex": "^0.1.1",
@@ -22,7 +22,7 @@
     "vuex": "^3.0.1"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^3.8.0",
+    "@vue/cli-plugin-babel": "^5.0.8",
     "cpass": "^2.1.1",
     "sp-rest-proxy": "^2.8.9",
     "stylus": "^0.54.5",
